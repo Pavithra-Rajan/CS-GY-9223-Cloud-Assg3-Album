@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo Search</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .photo-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .photo-grid img { max-width: 200px; height: auto; border: 1px solid #ccc; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .form-group { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Photo Store and Search</h1>
+        
+        <h2>Upload New Photo</h2>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="photoFile">Select Photo:</label>
+                <input type="file" id="photoFile" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <label for="customLabels">Custom Labels (comma-separated, optional):</label>
+                <input type="text" id="customLabels" placeholder="e.g., Sam, Sally, Vacation">
+            </div>
+            <button type="submit">Upload & Index Photo</button>
+            <p id="uploadMessage" style="color: green;"></p>
+        </form>
+
+        <hr>
+
+        <h2>Search Photos</h2>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="searchQuery">Natural Language Search:</label>
+                <input type="text" id="searchQuery" placeholder="show me photos with trees and birds in them" required>
+            </div>
+            <button type="submit">Search</button>
+        </form>
+
+        <h3>Results:</h3>
+        <div id="resultsGrid" class="photo-grid">
+            </div>
+    </div>
+
+    
+    <script src="lib/axios/dist/axios.standalone.js"></script>
+
+<script src="lib/url-template/url-template.js"></script>
+
+<script src="lib/apiGatewayCore/sigV4Client.js"></script>
+<script src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+<script src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+<script src="lib/apiGatewayCore/utils.js"></script>
+
+<script src="apigClient.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
