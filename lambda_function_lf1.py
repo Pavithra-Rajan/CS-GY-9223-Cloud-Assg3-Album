@@ -5,6 +5,7 @@ import urllib.parse
 from datetime import datetime
 
 import boto3
+# Note: You will need to package the 'requests' library with your Lambda deployment
 from requests_aws4auth import AWS4Auth 
 from requests.auth import HTTPBasicAuth
 import requests
@@ -16,6 +17,7 @@ logger.setLevel(logging.INFO)
 s3_client = boto3.client('s3')
 rekognition_client = boto3.client('rekognition')
 
+# Environment variables
 OPENSEARCH_HOST = os.environ.get('OPENSEARCH_HOST', '')
 OPENSEARCH_USERNAME = os.environ.get('OPENSEARCH_USERNAME' ,'')
 OPENSEARCH_PASSWORD = os.environ.get('OPENSEARCH_PASSWORD','')
@@ -24,8 +26,10 @@ INDEX_NAME = "photos"
 
 def lambda_handler(event, context):
     """Handles S3 PUT events to index photos into OpenSearch."""
-    
-    # Get S3 Object Info from the event (E1)
+    print(event)
+    print("context")
+    print(context)
+
     if not event.get('Records'):
         logger.error("No records found in S3 event.")
         return {'statusCode': 400, 'body': 'No S3 records'}
@@ -36,19 +40,18 @@ def lambda_handler(event, context):
     # Decode URL-encoded key (e.g., spaces become '+')
     object_key = urllib.parse.unquote_plus(record['s3']['object']['key'])
     
-    # The timestamp will be set as current time
     created_timestamp = datetime.utcnow().isoformat()
     
     logger.info(f"Processing object: {object_key} from bucket: {bucket_name}")
 
-    # Initialize the final labels array (A1)
     labels_array = [] 
 
-    # Retrieving Custom Metadata (x-amz-meta-customLabels) 
+    # Retrieve Custom Metadata (x-amz-meta-customLabels) ---
     try:
         logger.info(f"RAW EVENT KEY: {record['s3']['object']['key']}")
         logger.info(f"DECODED KEY: {object_key}")
 
+        # List the bucket keys for debug
         resp = s3_client.list_objects_v2(Bucket=bucket_name)
         all_keys = [obj['Key'] for obj in resp.get('Contents', [])]
         logger.info(f"AVAILABLE KEYS: {all_keys}")
@@ -56,10 +59,12 @@ def lambda_handler(event, context):
             Bucket=bucket_name,
             Key=object_key
         )
-
-        custom_labels_header = head_response['Metadata'].get('x-amz-meta-customlabels')
         
+        logger.info(f"Custom labels from metadata: {head_response.get('ResponseMetadata').get('HTTPHeaders').get('x-amz-meta-customlabels', {'None'})}")
+        custom_labels_header = head_response.get('ResponseMetadata').get('HTTPHeaders').get('x-amz-meta-customlabels', None)
+
         if custom_labels_header:
+
             custom_labels = [label.strip().lower() for label in custom_labels_header.split(',')]
             labels_array.extend(custom_labels)
             logger.info(f"Added custom labels: {custom_labels}")
@@ -67,7 +72,6 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"Error retrieving S3 metadata for {object_key}: {e}")
 
-    # Detect Labels using Rekognition 
     try:
         rekognition_response = rekognition_client.detect_labels(
             Image={
@@ -88,6 +92,7 @@ def lambda_handler(event, context):
         logger.error(f"Error detecting labels with Rekognition for {object_key}: {e}")
 
     final_labels = list(set([label for label in labels_array if label]))
+    logger.info(f"Final labels to index for {object_key}: {final_labels}")
 
     if not final_labels:
         logger.warning(f"No labels (custom or detected) found for {object_key}. Skipping index.")
@@ -100,7 +105,7 @@ def lambda_handler(event, context):
         'labels': final_labels
     }
     
-    # OpenSearch indexing 
+    # OpenSearch indexing setup
     try:
         os_client = OpenSearch(
         hosts=[{'host': OPENSEARCH_HOST, 'port': 443}],
@@ -117,6 +122,6 @@ def lambda_handler(event, context):
     )
     except Exception as e:
         logger.error(f"Error indexing document into OpenSearch for {object_key}: {e}")
-        return {'statusCode': 500, 'body': 'Error indexing document'}
+        return {'statusCode': 500, 'body': 'Error indexing document'}   
             
     return {'statusCode': 200, 'body': 'Indexing process executed'}
