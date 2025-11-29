@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  install:
+    commands: []
+  build:
+    commands: []
+  post_build:
+    commands:
+      - cd frontend
+      - aws s3 sync . s3://photo-album-nyu-cloudformation --exclude "CHANGELOG.md" --exclude "README.md" --delete
+
+artifacts:
+  files:
+    - frontend/**/*
