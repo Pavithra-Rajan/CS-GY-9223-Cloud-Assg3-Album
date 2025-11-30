@@ -5,6 +5,21 @@ const PHOTOS_BUCKET_ENDPOINT = "https://image-bucket-b2.s3.us-east-1.amazonaws.c
 var apigClient = apigClientFactory.newClient({
     apiKey: API_KEY
 });
+document.getElementById('photoFile').addEventListener('change', function () {
+    const file = this.files[0];
+    const errorSpan = document.getElementById('fileError');
+
+    if (!file) return;
+
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg"];
+
+    if (!allowedTypes.includes(file.type)) {
+        errorSpan.innerText = "Unsupported file type. Allowed: PNG, JPG, JPEG.";
+        this.value = ""; // clears the selected file
+    } else {
+        errorSpan.innerText = "";
+    }
+});
 
 document.getElementById('searchForm').addEventListener('submit', async function(e) {
     e.preventDefault();
