@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Photo Search</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .photo-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-        .photo-grid img { max-width: 200px; height: auto; border: 1px solid #ccc; }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
-        .form-group { margin-bottom: 15px; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Photo Store and Search</h1>
-        
-        <h2>Upload New Photo</h2>
-        <form id="uploadForm">
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">PS</div>
+                <div>
+                    <h1>Photo Store and Search</h1>
+                    <div class="sub">Upload, index and search your photos</div>
+                </div>
+            </div>
+            <div class="sub muted">Built with AWS Rekognition and Opensearch</div>
+        </header>
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <h2>Upload New Photo</h2>
+                    <form id="uploadForm">
             <div class="form-group">
                 <label for="photoFile">Select Photo:</label>
                 <input type="file" id="photoFile" accept="image/*" required>
@@ -26,22 +30,35 @@
                 <label for="customLabels">Custom Labels (comma-separated, optional):</label>
                 <input type="text" id="customLabels" placeholder="e.g., Sam, Sally, Vacation">
             </div>
-            <button type="submit">Upload & Index Photo</button>
-            <p id="uploadMessage" style="color: green;"></p>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button type="submit">Upload & Index Photo</button>
+                    <button type="button" class="secondary" id="clearUpload">Clear</button>
+                </div>
+                <p id="uploadMessage" class="muted" style="margin:0; padding-top:8px;"></p>
+                <img id="uploadPreview" alt="Preview" style="display:none;" />
         </form>
 
-        <hr>
-
-        <h2>Search Photos</h2>
-        <form id="searchForm">
+            </form>
+        </div>
+        <br>
+            <aside>
+                <div class="card">
+                    <h2>Search Photos</h2>
+                    <form id="searchForm">
             <div class="form-group">
                 <label for="searchQuery">Natural Language Search:</label>
                 <input type="text" id="searchQuery" placeholder="show me photos with trees and birds in them" required>
             </div>
-            <button type="submit">Search</button>
-        </form>
+                    <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                        <button type="submit">Search</button>
+                        <button class="secondary" type="button" id="clearSearch">Clear</button>
+                    </div>
+                    </form>
+                </div>
+            </aside>
+        </div>
 
-        <h3>Results:</h3>
+        <!-- <h3 style="margin-top:18px">Results</h3> -->
         <div id="resultsGrid" class="photo-grid">
             </div>
     </div>

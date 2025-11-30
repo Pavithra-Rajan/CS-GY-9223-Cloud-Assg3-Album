@@ -1,5 +1,5 @@
 // get api key from config file
-const API_KEY = config.apiKey;
+const API_KEY = config.API_KEY;
 const PHOTOS_BUCKET_ENDPOINT = "https://image-bucket-b2.s3.us-east-1.amazonaws.com/"; 
 
 var apigClient = apigClientFactory.newClient({
@@ -34,13 +34,32 @@ document.getElementById('searchForm').addEventListener('submit', async function(
         const PHOTOS_BUCKET_ENDPOINT = "https://image-bucket-b2.s3.us-east-1.amazonaws.com/"; 
 
         photoReferences.forEach(ref => {
+            const imageUrl = ref.url || `${PHOTOS_BUCKET_ENDPOINT}${ref.objectKey}`;
 
-            const imageUrl = `${PHOTOS_BUCKET_ENDPOINT}${ref.objectKey}`;
-            
+            const card = document.createElement('div');
+            card.className = 'photo-card';
             const imgElement = document.createElement('img');
             imgElement.src = imageUrl;
             imgElement.alt = ref.objectKey;
-            resultsGrid.appendChild(imgElement);
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const key = document.createElement('div');
+            key.className = 'key';
+            key.textContent = ref.objectKey;
+            const bucket = document.createElement('div');
+            bucket.className = 'bucket';
+            bucket.textContent = ref.bucket || '';
+            const labels = document.createElement('div');
+            labels.className = 'bucket muted';
+            labels.textContent = (ref.labels && ref.labels.join(', ')) || '';
+
+            meta.appendChild(key);
+            meta.appendChild(bucket);
+            if (labels && labels.textContent) meta.appendChild(labels);
+            card.appendChild(imgElement);
+            card.appendChild(meta);
+            resultsGrid.appendChild(card);
         });
         console.log("Search response:", response);
         
@@ -101,3 +120,34 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
         uploadMessage.innerText = "Photo Upload Failed: " + err.message;
     }
 });
+
+// Hook up clear buttons and file preview behavior
+const clearUploadBtn = document.getElementById('clearUpload');
+if (clearUploadBtn) {
+    clearUploadBtn.addEventListener('click', () => {
+        document.getElementById('photoFile').value = '';
+        document.getElementById('customLabels').value = '';
+        const uploadMessage = document.getElementById('uploadMessage');
+        if (uploadMessage) { uploadMessage.innerText = ''; uploadMessage.className = ''; }
+        const previewEl = document.getElementById('uploadPreview');
+        if (previewEl) { previewEl.style.display = 'none'; previewEl.src = ''; }
+    });
+}
+
+const clearSearchBtn = document.getElementById('clearSearch');
+if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+        document.getElementById('searchQuery').value = '';
+        document.getElementById('resultsGrid').innerHTML = '';
+    });
+}
+
+const photoFileInput = document.getElementById('photoFile');
+if (photoFileInput) {
+    photoFileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const previewEl = document.getElementById('uploadPreview');
+        if (!file) { if (previewEl) { previewEl.style.display = 'none'; previewEl.src = ''; } return; }
+        if (previewEl) { previewEl.src = URL.createObjectURL(file); previewEl.style.display = 'block'; }
+    });
+}
