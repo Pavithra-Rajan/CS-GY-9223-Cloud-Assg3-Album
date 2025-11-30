@@ -128,6 +128,10 @@ Are there photos of {Keyword1} or {Keyword2}
 - Add necessary IAM permissions to create lambdas and s3 buckets.
 
 ![alt text](assets/cloudformation.png)
+
+## Architecture
+<img width="689" height="503" alt="image" src="https://github.com/user-attachments/assets/9831bb75-8490-4f3d-9822-771a75940362" />
+
 ## References
 - [Rekognition](https://aws.amazon.com/rekognition/)
 - [Configure S3 to publish trigger events](https://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html)
